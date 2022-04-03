@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ProductIds } from "./Buyflow";
+import ProductIds from "../enums/productIds";
 
 interface SummaryStepProps {
   collectedData: {

@@ -3,14 +3,11 @@ import AgeStep from "./AgeStep";
 import NameStep from "./NameStep";
 import EmailStep from "./EmailStep";
 import SummaryStep from "./SummaryStep";
+import Step from "./Step";
+import ProductIds from "../enums/productIds";
 
 interface BuyflowProps {
   productId: ProductIds;
-}
-
-export enum ProductIds {
-  devIns = "dev_ins",
-  desIns = "des_ins"
 }
 
 const PRODUCT_IDS_TO_NAMES = {
@@ -26,44 +23,58 @@ const Buyflow: React.FC<BuyflowProps> = (props) => {
     firstName: "",
     lastName: ""
   });
+
   const getStepCallback = (nextStep: string) => (field: string, value: any) => {
     updateData({ ...collectedData, [field]: value });
     setStep(nextStep);
   };
 
+  const getFLowProps = () => {
+    switch (currentStep) {
+      case "email":
+        return {
+          cb: getStepCallback("age"),
+          component: EmailStep
+        };
+      case "age":
+        return {
+          cb:
+            props.productId === ProductIds.devIns
+              ? getStepCallback("summary")
+              : getStepCallback("firstName"),
+          component: AgeStep
+        };
+      case "firstName":
+        return {
+          cb: getStepCallback("lastName"),
+          component: NameStep,
+          nameLabel: "First Name",
+          nameKey: "firstName"
+        };
+      case "lastName":
+        return {
+          cb: getStepCallback("summary"),
+          component: NameStep,
+          nameLabel: "Last Name",
+          nameKey: "lastName"
+        };
+      case "summary":
+        return {
+          component: SummaryStep,
+          productId: props.productId,
+          collectedData: collectedData
+        };
+      default:
+        return {
+          component: EmailStep
+        };
+    }
+  };
+
   return (
     <>
       <h4>Buying {PRODUCT_IDS_TO_NAMES[props.productId]}</h4>
-      {(currentStep === "email" && <EmailStep cb={getStepCallback("age")} />) ||
-        (currentStep === "age" && (
-          <AgeStep
-            cb={
-              props.productId === ProductIds.devIns
-                ? getStepCallback("summary")
-                : getStepCallback("firstName")
-            }
-          />
-        )) ||
-        (currentStep === "firstName" && (
-          <NameStep
-            nameLabel="First Name"
-            nameKey="firstName"
-            cb={getStepCallback("lastName")}
-          />
-        )) ||
-        (currentStep === "lastName" && (
-          <NameStep
-            nameLabel="Last Name"
-            nameKey="lastName"
-            cb={getStepCallback("summary")}
-          />
-        )) ||
-        (currentStep === "summary" && (
-          <SummaryStep
-            productId={props.productId}
-            collectedData={collectedData}
-          />
-        ))}
+      <Step currentStep={currentStep} {...getFLowProps()} />
     </>
   );
 };
