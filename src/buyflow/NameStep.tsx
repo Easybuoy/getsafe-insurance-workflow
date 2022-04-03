@@ -10,8 +10,10 @@ const NameStep: React.FC<NameStepProps> = (props) => {
   const [name, setName] = useState("");
 
   const onClickHandler = () => {
-    props.cb(props.nameKey, name);
-    setName("");
+    if (name) {
+      props.cb(props.nameKey, name);
+      setName("");
+    }
   };
 
   return (
@@ -21,9 +23,12 @@ const NameStep: React.FC<NameStepProps> = (props) => {
         <input
           type="text"
           onChange={({ target: { value } }) => {
-            setName(value);
+            if (value) {
+              setName(value);
+            }
           }}
           value={name}
+          required
         ></input>
       </div>
       <button onClick={() => onClickHandler()}>Next</button>
